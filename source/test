@@ -1,0 +1,104 @@
+"""
+@author: Zaw
+"""
+
+from pyb import Pin, Timer
+
+class L6206:
+    # Constructor to initialize motor control pins and PWM timer
+    def __init__(self, PWM_tim, IN1_pin, IN2_pin, EN_pin):
+        """ 
+        Creates a motor driver by initializing GPIO
+        pins and turning off the motor for safety. 
+        @param en_pin: Pin connected to the enable pin of the motor driver
+        @param in1_pin: Pin connected to IN1A of the motor driver
+        @param in2_pin: Pin connected to IN2A of the motor driver
+        @param timer: Timer used for PWM control
+        """
+        self.EN = EN_pin
+        self.IN1 = Pin(IN1_pin, Pin.OUT_PP)
+        self.IN2 = Pin(IN2_pin, Pin.OUT_PP)
+        
+        self.tim = PWM_tim
+        
+        self.PWM1 = self.tim.channel(1, mode=Timer.PWM)  # Initialize PWM channel 1
+        self.PWM2 = self.tim.channel(2, mode=Timer.PWM)  # Initialize PWM channel 2
+        
+    # Method to set duty cycle for motor control
+    def set_duty(self, duty):
+        """
+        This method sets the duty cycle to be sent
+        to the motor to the given level. Positive values
+        cause torque in one direction, negative values
+        in the opposite direction.
+        @param level: A signed integer holding the duty
+               cycle of the voltage sent to the motor 
+        """
+        if forward:
+            self.PWM1.pulse_width_percent(duty)  # Set duty cycle for forward motion
+            self.PWM2.pulse_width_percent(0)
+        elif backward:
+            self.PWM1.pulse_width_percent(0)
+            self.PWM2.pulse_width_percent(-duty)  # Set duty cycle for backward motion
+        
+    # Method to enable motor driver
+    def enable(self):
+        self.EN.high()  # Set enable pin high to enable motor driver
+        
+    # Method to turn motor on (assuming IN1 and IN2 are control pins)
+    def on(self):
+          """
+        Turns on the motor.
+        """
+        self.IN1.high()  # Set IN1 pin high
+        self.IN2.low()   # Set IN2 pin low
+        
+    # Method to turn motor off
+    def off(self):
+         """
+        Turns off the motor.
+        """
+        self.IN1.low()   # Set IN1 pin low
+        
+    # Method to set motor direction forward
+    def forward(self):
+          """
+        Move the motor forward.
+        """
+        forward = 1
+        backward = 0  # Set direction flags
+        
+    # Method to set motor direction backward
+    def backward(self):
+           """
+        Move the motor backward.
+        """
+        forward = 0
+        backward = 1  # Set direction flags
+
+# Main function to test the motor control
+if __name__ == '__main__':
+    tim_A = Timer(3, freq=20_000)  # Initialize timer for PWM
+    mot_A = L6206(tim_A, Pin.cpu.B4, Pin.cpu.B5, Pin.cpu.A10)  # Initialize motor A with pins
+    mot_A.enable()  # Enable motor driver
+    mot_A.set_duty(40)  # Set duty cycle for motor A
+    
+    # Similar setup for another motor (currently commented out)
+    """
+    tim_B = Timer(5, freq=20_000)
+    mot_B = L6206(tim_B, Pin.cpu.A0, Pin.cpu.A1, Pin.cpu.C1)
+    mot_B.enable()
+    mot_B.set_duty(40)
+    """
+    """
+     # Test code
+    # Initialize motor driver with appropriate pins and timer
+    motor = MotorDriver('EN_PIN', 'IN1_PIN', 'IN2_PIN', Timer(4))
+    
+    # Test various duty cycles
+    motor.set_duty_cycle(50)  # Forward motion at 50% duty cycle
+    pyb.delay(2000)  # Delay for 2 seconds
+    motor.set_duty_cycle(-50)  # Backward motion at 50% duty cycle
+    pyb.delay(2000)  # Delay for 2 seconds
+    motor.set_duty_cycle(0)  # Stop the motor
+    """
